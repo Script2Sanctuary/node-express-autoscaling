@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-express-autoscaling
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-express-autoscaling
+  template:
+    metadata:
+      labels:
+        app: node-express-autoscaling
+    spec:
+      containers:
+      - name: node-express-app
+        image: royazizbarera/node-express-autoscaling:latest
+        ports:
+        - containerPort: 3000
+        # resources:
+        #   requests:
+        #     memory: "64Mi"
+        #     cpu: "250m"
+        #   limits:
+        #     memory: "128Mi"
+        #     cpu: "500m"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m" # Requests CPU lebih kecil
+          limits:
+            memory: "128Mi"
+            cpu: "200m" # Limits CPU lebih kecil
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-express-service
+spec:
+  type: NodePort
+  selector:
+    app: node-express-autoscaling
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+    nodePort: 30007
